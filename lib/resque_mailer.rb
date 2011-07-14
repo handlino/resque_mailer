@@ -42,7 +42,7 @@ module Resque
       end
 
       def perform(action, *args)
-        self.send(:new, action, *args).message.deliver!
+        self.send(:new, action, *args).message.deliver
       end
 
       def environment_excluded?
