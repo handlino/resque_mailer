@@ -31,6 +31,13 @@ module Resque
           super.tap do |resque_mail|
             resque_mail.class_eval do
               define_method(:deliver) do
+                args.map! do |arg|
+                  if arg.kind_of?(ActiveRecord::Base)
+                    {"model_class" => arg.class.to_s, "id" => arg.id}
+                  else
+                    arg
+                  end
+                end
                 resque.enqueue(mailer_class, method_name, *args)
                 self
               end
@@ -42,6 +49,14 @@ module Resque
       end
 
       def perform(action, *args)
+        args.map! do |arg|
+          if arg.is_a?(Hash) && arg["model_class"]
+            Kernel.const_get(arg["model_class"]).find(arg["id"])
+          else
+            arg
+          end
+        end
+        puts args.inspect
         self.send(:new, action, *args).message.deliver
       end
 
