@@ -56,7 +56,6 @@ module Resque
             arg
           end
         end
-        puts args.inspect
         self.send(:new, action, *args).message.deliver
       end
 
